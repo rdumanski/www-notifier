@@ -4,7 +4,7 @@ import hashlib
 from bs4 import BeautifulSoup
 
 # --- CONFIGURATION ---
-URL_TO_MONITOR = "https://www.prezydent.pl/prawo/ustawy-podpisane/ustawy-podpisane-w-lutym-2026-r,114968"
+URL_TO_MONITOR = "https://www.flashscore.com"
 # Pick a very random name so others don't "guess" your notifications
 TOPIC_NAME = "monitor_zmian_xyz_9988" 
 NTFY_URL = f"https://ntfy.sh/podpis"
