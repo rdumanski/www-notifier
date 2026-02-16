@@ -8,7 +8,7 @@ URL_TO_MONITOR = "https://www.prezydent.pl/prawo/ustawy-podpisane/ustawy-podpisa
 # Pick a very random name so others don't "guess" your notifications
 TOPIC_NAME = "monitor_zmian_xyz_9988" 
 NTFY_URL = f"https://ntfy.sh/podpis"
-CHECK_INTERVAL = 600  # 10 minutes
+CHECK_INTERVAL = 300  # 10 minutes
 
 def send_notification(message):
     """Sends a push notification without any passwords."""
