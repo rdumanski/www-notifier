@@ -1,44 +1,54 @@
 import requests
-from bs4 import BeautifulSoup
 import time
 import hashlib
+from bs4 import BeautifulSoup
 
-# Konfiguracja
-URL_TO_MONITOR = "https://przyklad.pl/promocje"
-CHECK_INTERVAL = 60 # czas w sekundach (np. co minutę)
+# --- CONFIGURATION ---
+URL_TO_MONITOR = "https://www.prezydent.pl/prawo/ustawy-podpisane/ustawy-podpisane-w-lutym-2026-r,114968"
+# Pick a very random name so others don't "guess" your notifications
+TOPIC_NAME = "monitor_zmian_xyz_9988" 
+NTFY_URL = f"https://ntfy.sh/podpis"
+CHECK_INTERVAL = 600  # 10 minutes
+
+def send_notification(message):
+    """Sends a push notification without any passwords."""
+    try:
+        requests.post(NTFY_URL, 
+                      data=message.encode('utf-8'),
+                      headers={
+                          "Title": "Zmiana na stronie!",
+                          "Priority": "high",
+                          "Tags": "bell,warning"
+                      })
+    except Exception as e:
+        print(f"Błąd powiadomienia: {e}")
 
 def get_page_hash():
-    """Pobiera zawartość strony i tworzy jej 'odcisk palca' (hash)."""
     headers = {'User-Agent': 'Mozilla/5.0'}
     response = requests.get(URL_TO_MONITOR, headers=headers)
-    
-    # Wybieramy tekst, aby uniknąć fałszywych alarmów przez dynamiczne skrypty/reklamy
     soup = BeautifulSoup(response.text, "html.parser")
-    
-    # Opcjonalnie: ogranicz się do konkretnego elementu, np. div o id="content"
-    # content = soup.find("div", {"id": "content"}).text
+    # Monitor only the text to avoid hidden code changes
     content = soup.get_text()
-    
     return hashlib.sha256(content.encode('utf-8')).hexdigest()
 
 def monitor():
-    print("Rozpoczynam monitoring...")
-    last_hash = get_page_hash()
+    print(f"Monitoring... Subskrybuj temat 'podpis' w aplikacji ntfy.")
+    send_notification("Monitor uruchomiony pomyślnie!")
     
+    try:
+        last_hash = get_page_hash()
+    except:
+        return
+
     while True:
+        time.sleep(CHECK_INTERVAL)
         try:
-            time.sleep(CHECK_INTERVAL)
             current_hash = get_page_hash()
-            
             if current_hash != last_hash:
-                print(f"ALERTT! Strona uległa zmianie: {URL_TO_MONITOR}")
+                send_notification(f"Wykryto zmianę na: {URL_TO_MONITOR}")
                 last_hash = current_hash
-                # Tutaj możesz dodać wysyłkę e-maila lub powiadomienie push
-            else:
-                print("Brak zmian...")
-                
         except Exception as e:
-            print(f"Wystąpił błąd: {e}")
+            print(f"Błąd: {e}")
 
 if __name__ == "__main__":
     monitor()
